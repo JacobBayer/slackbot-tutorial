@@ -1,6 +1,4 @@
 import os
-import schedule
-import time
 import logging
 from slack.web.client import WebClient
 from slack.errors import SlackApiError
@@ -156,7 +154,7 @@ def main(test):
         logging.error('Request to Slack API Failed: {}.'.format(e.response.status_code))
         logging.error(e.response)
     
-    msg = '<!here>'
+    msg = ''
     
     if len(list_of_regular_TAT_ids)>0:
         msg = msg + "\n COVID reports requiring attention:"
@@ -178,13 +176,16 @@ def main(test):
             url = "https://elements.phosphorus.com/reporting/reports/{}/edit".format(x)
             msg = msg + "\n <{url}|{id}>".format(**{'id':x,'url':url})
     
-    sendMessage(msg,test)
+
         
-    if len(msg)==0:
+    if msg=='':
         sendMessage('Just checked. Nothing to report.',test)
+    elif test:
+        sendMessage(msg,test)
+    else:
+        sendMessage("<!here>" + msg,test)
         
     logging.basicConfig(level=logging.DEBUG)
-
 
 
 if __name__ == "__main__":
