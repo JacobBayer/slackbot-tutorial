@@ -37,6 +37,8 @@ import pandas as pd
 		
 		order by (now() - k.received_at) desc
 """       
+
+
 def main(test):
     approve_these_samples="""
     SELECT	
@@ -189,11 +191,13 @@ def main(test):
 
 
 if __name__ == "__main__":
+    '''
     test = input("Test? [Y/N]")
     if "Y" in test.upper():
         test=True
     else:
         test=False
-        
+    '''
+    test=False
     main(test)
 
