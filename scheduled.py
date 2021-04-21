@@ -4,6 +4,7 @@ from slack.web.client import WebClient
 from slack.errors import SlackApiError
 from sqlalchemy import create_engine
 import pandas as pd
+from datetime import datetime
 
 """
     SELECT	
@@ -69,6 +70,10 @@ def main(test):
     	AND (d.parent_distributor_id = 15 or r.cached_distributor_id = 15)
     """
     
+    if datetime.now().hour<10:
+        status = "('awaiting_results','awaiting_review')"
+    else:
+        status = "('awaiting_results','awaiting_review','approved')"
     
     covid_reports_approaching_tat="""
     SELECT	
@@ -93,7 +98,7 @@ def main(test):
         left join report_sample_data_sources rsds on rsds.report_id = r.id
     
     	WHERE
-    	r.status IN ('awaiting_results','awaiting_review','approved')
+    	r.status IN {status}
     	and r.created_at > now() - interval '2 weeks'
     	and r.report_type_id = 283
     	and s.received_at is not null
@@ -101,7 +106,7 @@ def main(test):
     	--and t.category in ('Critical Missing Information', 'Missing Information')
     	AND (d.parent_distributor_id = 15 or r.cached_distributor_id = 15)
         AND rsds.id  is not null
-        """
+        """.format(**{'status':status})
         
     regular_approaching_tat = covid_reports_approaching_tat + "\n and not r.expedited \n and (now() - s.received_at) >= interval '32 hours'"
         
@@ -175,6 +180,7 @@ def main(test):
         for x in list_of_unplated_stat_ids:
             url = "https://elements.phosphorus.com/reporting/reports/{}/edit".format(x)
             msg = msg + "\n <{url}|{id}>".format(**{'id':x,'url':url})
+    
     
 
         
